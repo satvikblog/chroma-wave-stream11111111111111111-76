@@ -9,7 +9,85 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      topics: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+          week_id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+          week_id: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+          week_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topics_week_id_fkey"
+            columns: ["week_id"]
+            isOneToOne: false
+            referencedRelation: "weeks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      videos: {
+        Row: {
+          created_at: string
+          embed_url: string
+          id: number
+          title: string
+          topic_id: number
+        }
+        Insert: {
+          created_at?: string
+          embed_url: string
+          id?: number
+          title: string
+          topic_id: number
+        }
+        Update: {
+          created_at?: string
+          embed_url?: string
+          id?: number
+          title?: string
+          topic_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weeks: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

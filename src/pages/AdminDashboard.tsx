@@ -1,7 +1,11 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, Week, Topic, Video } from '../lib/supabase';
+import { 
+  Week, Topic, Video,
+  getWeeks, getTopics, getVideos,
+  addWeek, addTopic, addVideo,
+  deleteWeek, deleteTopic, deleteVideo
+} from '../lib/supabase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -53,26 +57,17 @@ const AdminDashboard = () => {
       setLoading(true);
       
       // Fetch weeks
-      const { data: weeksData, error: weeksError } = await supabase
-        .from('weeks')
-        .select('*')
-        .order('id');
+      const { data: weeksData, error: weeksError } = await getWeeks();
       
       if (weeksError) throw weeksError;
       
       // Fetch topics
-      const { data: topicsData, error: topicsError } = await supabase
-        .from('topics')
-        .select('*')
-        .order('id');
+      const { data: topicsData, error: topicsError } = await getTopics();
       
       if (topicsError) throw topicsError;
       
       // Fetch videos
-      const { data: videosData, error: videosError } = await supabase
-        .from('videos')
-        .select('*')
-        .order('id');
+      const { data: videosData, error: videosError } = await getVideos();
       
       if (videosError) throw videosError;
       
@@ -107,10 +102,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('weeks')
-        .insert([{ name: newWeekName.trim() }])
-        .select();
+      const { data, error } = await addWeek(newWeekName.trim());
 
       if (error) throw error;
 
@@ -142,13 +134,10 @@ const AdminDashboard = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('topics')
-        .insert([{ 
-          name: newTopicName.trim(),
-          week_id: parseInt(newTopicWeekId)
-        }])
-        .select();
+      const { data, error } = await addTopic(
+        newTopicName.trim(), 
+        parseInt(newTopicWeekId)
+      );
 
       if (error) throw error;
 
@@ -181,14 +170,11 @@ const AdminDashboard = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('videos')
-        .insert([{ 
-          title: newVideoTitle.trim(),
-          embed_url: newVideoUrl.trim(),
-          topic_id: parseInt(newVideoTopicId)
-        }])
-        .select();
+      const { data, error } = await addVideo(
+        newVideoTitle.trim(),
+        newVideoUrl.trim(),
+        parseInt(newVideoTopicId)
+      );
 
       if (error) throw error;
 
@@ -217,34 +203,9 @@ const AdminDashboard = () => {
     }
     
     try {
-      // First find all topics in this week
-      const weekTopics = topics.filter(topic => topic.week_id === id);
-      
-      // Delete all videos in these topics
-      for (const topic of weekTopics) {
-        const { error } = await supabase
-          .from('videos')
-          .delete()
-          .eq('topic_id', topic.id);
-          
-        if (error) throw error;
-      }
-      
-      // Delete all topics in this week
-      const { error: topicsError } = await supabase
-        .from('topics')
-        .delete()
-        .eq('week_id', id);
+      const { error } = await deleteWeek(id);
         
-      if (topicsError) throw topicsError;
-      
-      // Finally delete the week
-      const { error: weekError } = await supabase
-        .from('weeks')
-        .delete()
-        .eq('id', id);
-        
-      if (weekError) throw weekError;
+      if (error) throw error;
       
       toast({
         title: "Success",
@@ -268,19 +229,7 @@ const AdminDashboard = () => {
     }
     
     try {
-      // First delete all videos in this topic
-      const { error: videosError } = await supabase
-        .from('videos')
-        .delete()
-        .eq('topic_id', id);
-        
-      if (videosError) throw videosError;
-      
-      // Then delete the topic
-      const { error } = await supabase
-        .from('topics')
-        .delete()
-        .eq('id', id);
+      const { error } = await deleteTopic(id);
         
       if (error) throw error;
       
@@ -306,10 +255,7 @@ const AdminDashboard = () => {
     }
     
     try {
-      const { error } = await supabase
-        .from('videos')
-        .delete()
-        .eq('id', id);
+      const { error } = await deleteVideo(id);
         
       if (error) throw error;
       

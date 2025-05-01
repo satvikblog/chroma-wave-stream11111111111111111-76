@@ -1,6 +1,8 @@
-
 import { useEffect, useState } from 'react';
-import { supabase, Week, Topic, Video } from '../lib/supabase';
+import { 
+  supabase, Week, Topic, Video, 
+  getWeeks, getTopics, getVideos 
+} from '../lib/supabase';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import VideoPlayer from '../components/VideoPlayer';
@@ -20,26 +22,17 @@ const Home = () => {
     const fetchData = async () => {
       try {
         // Fetch weeks
-        const { data: weeksData, error: weeksError } = await supabase
-          .from('weeks')
-          .select('*')
-          .order('id');
+        const { data: weeksData, error: weeksError } = await getWeeks();
         
         if (weeksError) throw weeksError;
         
         // Fetch topics
-        const { data: topicsData, error: topicsError } = await supabase
-          .from('topics')
-          .select('*')
-          .order('id');
+        const { data: topicsData, error: topicsError } = await getTopics();
         
         if (topicsError) throw topicsError;
         
         // Fetch videos
-        const { data: videosData, error: videosError } = await supabase
-          .from('videos')
-          .select('*')
-          .order('id');
+        const { data: videosData, error: videosError } = await getVideos();
         
         if (videosError) throw videosError;
         
