@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { 
   supabase, Week, Topic, Video, 
@@ -8,6 +9,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import VideoPlayer from '../components/VideoPlayer';
 import Layout from '../components/Layout';
 import { useToast } from '@/hooks/use-toast';
+import { Card } from '@/components/ui/card';
+import { Terminal, PlayCircle, Clock } from 'lucide-react';
 
 const Home = () => {
   const [weeks, setWeeks] = useState<Week[]>([]);
@@ -85,8 +88,9 @@ const Home = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-[70vh]">
+        <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
           <div className="w-16 h-16 border-4 border-neon-green/30 border-t-neon-green rounded-full animate-spin"></div>
+          <p className="text-neon-green animate-pulse">Loading content...</p>
         </div>
       </Layout>
     );
@@ -100,33 +104,73 @@ const Home = () => {
     return videos.filter(video => video.topic_id === topicId);
   };
 
+  // Get featured video (just using the first one for now)
+  const featuredVideo = videos.length > 0 ? videos[0] : null;
+
   return (
     <Layout>
+      {/* Hero Section */}
+      <section className="mb-12">
+        <div className="glassmorphism rounded-xl overflow-hidden">
+          <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8">
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neon-green/20 text-neon-green text-xs font-medium mb-6">
+                <Terminal className="w-3 h-3" /> 
+                <span>CYBERSECURITY TRAINING</span>
+              </div>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-glow">
+                Enhance Your <span className="text-neon-green">Hacking Skills</span> with Expert-Led Videos
+              </h1>
+              <p className="text-muted-foreground mb-8 max-w-xl">
+                Access comprehensive cybersecurity tutorials, hands-on labs, and expert insights to master ethical hacking and penetration testing.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
       <div className="grid grid-cols-1 gap-8 md:gap-12 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {selectedVideo ? (
             <div className="space-y-6">
-              <VideoPlayer 
-                embedUrl={selectedVideo.embed_url} 
-                title={selectedVideo.title} 
-              />
+              <Card className="glassmorphism overflow-hidden border-neon-green/10">
+                <VideoPlayer 
+                  embedUrl={selectedVideo.embed_url} 
+                  title={selectedVideo.title} 
+                />
+              </Card>
               
               <div className="glassmorphism rounded-xl p-6">
-                <h2 className="text-2xl font-bold mb-2">{selectedVideo.title}</h2>
-                <p className="text-muted-foreground">
-                  {topics.find(t => t.id === selectedVideo?.topic_id)?.name} - {
+                <div className="flex items-center gap-2 mb-4">
+                  <PlayCircle className="text-neon-green" size={18} />
+                  <h2 className="text-2xl font-bold">{selectedVideo.title}</h2>
+                </div>
+                
+                <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
+                  <div className="flex items-center gap-1">
+                    <Clock size={14} />
+                    <span>Module {topics.find(t => t.id === selectedVideo?.topic_id)?.name}</span>
+                  </div>
+                  <span>•</span>
+                  <span>Week {
                     weeks.find(w => 
                       w.id === topics.find(t => t.id === selectedVideo?.topic_id)?.week_id
                     )?.name
-                  }
+                  }</span>
+                </div>
+                
+                <p className="text-muted-foreground text-sm">
+                  Learn advanced techniques and strategies for enhancing your cybersecurity skills. 
+                  This lesson covers important concepts with practical examples.
                 </p>
               </div>
             </div>
           ) : (
             <div className="glassmorphism rounded-xl p-6 flex flex-col items-center justify-center h-64">
-              <h2 className="text-2xl font-bold text-center">Welcome to ChromaStream</h2>
-              <p className="text-muted-foreground text-center mt-2">
-                Please select a video from the playlist to start watching.
+              <h2 className="text-2xl font-bold text-center mb-2">Welcome to HackOps Streaming</h2>
+              <p className="text-muted-foreground text-center">
+                Please select a video from the curriculum to start your learning journey.
               </p>
             </div>
           )}
@@ -134,32 +178,36 @@ const Home = () => {
         
         <div>
           <div className="glassmorphism rounded-xl p-4 sticky top-24">
-            <h2 className="text-xl font-bold mb-4 px-2">Course Content</h2>
+            <div className="flex items-center gap-2 px-2 mb-4">
+              <Terminal size={18} className="text-neon-green" />
+              <h2 className="text-xl font-bold">Course Curriculum</h2>
+            </div>
+            
             {weeks.length > 0 ? (
               <Tabs 
                 value={activeWeek || weeks[0].id.toString()} 
                 onValueChange={setActiveWeek}
                 className="w-full"
               >
-                <TabsList className="w-full flex overflow-x-auto hide-scrollbar mb-4">
+                <TabsList className="w-full flex overflow-x-auto hide-scrollbar mb-4 bg-dark-200/60">
                   {weeks.map((week) => (
                     <TabsTrigger 
                       key={week.id} 
                       value={week.id.toString()}
-                      className="flex-1 min-w-[100px] data-[state=active]:border-b-2 data-[state=active]:border-neon-green"
+                      className="flex-1 min-w-[100px] data-[state=active]:bg-neon-green/20 data-[state=active]:text-neon-green"
                     >
-                      {week.name}
+                      Week {week.name}
                     </TabsTrigger>
                   ))}
                 </TabsList>
                 
                 {weeks.map((week) => (
                   <TabsContent key={week.id} value={week.id.toString()}>
-                    <div className="max-h-[60vh] overflow-y-auto pr-2">
+                    <div className="max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neon-green/20 scrollbar-track-transparent">
                       <Accordion type="multiple" className="space-y-2">
                         {getTopicsByWeek(week.id).map((topic) => (
-                          <AccordionItem key={topic.id} value={topic.id.toString()} className="border border-border/20 rounded-lg overflow-hidden">
-                            <AccordionTrigger className="px-4 py-3 hover:bg-dark-200/60">
+                          <AccordionItem key={topic.id} value={topic.id.toString()} className="border border-neon-green/10 rounded-lg overflow-hidden bg-dark-200/30">
+                            <AccordionTrigger className="px-4 py-3 hover:bg-dark-200/60 text-sm font-medium">
                               {topic.name}
                             </AccordionTrigger>
                             <AccordionContent className="px-2 pb-2">
@@ -168,10 +216,11 @@ const Home = () => {
                                   <li key={video.id}>
                                     <button
                                       onClick={() => handleVideoSelect(video)}
-                                      className={`w-full text-left px-4 py-2 rounded-md hover:bg-dark-200/80 transition-colors
-                                        ${selectedVideo?.id === video.id ? 'bg-dark-200/80 border-l-2 border-neon-green' : ''}
+                                      className={`w-full text-left px-4 py-2 rounded-md hover:bg-dark-200/80 transition-colors flex items-center gap-2 text-sm
+                                        ${selectedVideo?.id === video.id ? 'bg-neon-green/10 border-l-2 border-neon-green' : ''}
                                       `}
                                     >
+                                      <PlayCircle size={14} className={selectedVideo?.id === video.id ? 'text-neon-green' : 'text-muted-foreground'} />
                                       {video.title}
                                     </button>
                                   </li>
