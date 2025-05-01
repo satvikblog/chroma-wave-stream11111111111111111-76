@@ -1,10 +1,8 @@
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Export the supabase client from the integrations folder
+export const supabase = supabaseClient;
 
 // Define database types
 export type Week = {
